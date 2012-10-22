@@ -1,0 +1,40 @@
+{
+  "name": "grunt-doxer",
+  "description": "dox grunt plugin",
+  "version": "0.1.0",
+  "homepage": "https://github.com/kates/grunt-doxer",
+  "author": {
+    "name": "kates",
+    "email": "katesgasis@gmail.com",
+    "url": "http://katesgasis.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kates/grunt-doxer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kates/grunt-doxer/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/kates/grunt-doxer/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "grunt.js",
+  "bin": "bin/grunt-doxer",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~0.3.15",
+    "dox": ">= 0.0.1",
+    "rimraf": ">= 0.0.1"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
