@@ -12,6 +12,7 @@ var fs = require('fs'),
 	dox = require("dox");
 
 module.exports = function(grunt) {
+	"use strict";
 	// Please see the grunt documentation for more information regarding task and
 	// helper creation: https://github.com/cowboy/grunt/blob/master/docs/toc.md
 
@@ -29,7 +30,7 @@ module.exports = function(grunt) {
 
 		var files = grunt.helper("concat", files1, {separator: ";"});
 		grunt.helper("doxer", files, options, function(fname, comments) {
-			grunt.file.write(dest + "/" + fname, comments)
+			grunt.file.write(dest + "/" + fname, comments);
 		});
 	});
 
@@ -39,7 +40,7 @@ module.exports = function(grunt) {
 
 	grunt.registerHelper('doxer', function(str, options, callback) {
 		var comments = dox.parseComments(str);
-		if (options.format == "api") {
+		if (options.format === "api") {
 			callback("api.md", dox.api(comments));
 		} else {
 			callback("api.json", JSON.stringify(comments));
