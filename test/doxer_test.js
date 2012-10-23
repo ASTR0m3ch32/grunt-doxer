@@ -21,14 +21,25 @@ var grunt = require('grunt');
 */
 
 exports['doxer'] = {
-  setUp: function(done) {
-    // setup here
-    done();
-  },
-  'helper': function(test) {
-    test.expect(1);
-    // tests here
-    test.equal(grunt.helper('doxer'), 'doxer!!!', 'should return the correct value.');
-    test.done();
-  }
+	setUp: function(done) {
+	// setup here
+		done();
+	},
+	'json': function(test) {
+		var str = "/**\n* @param {String} the param\n* @return {String} result\n*/\nfunction dummy(str) { return str;}";
+
+		grunt.helper('doxer', str, {format: "json"}, function(fname, comments) {
+			var commentsJson = JSON.parse(comments);
+			test.equal(commentsJson[0]["ctx"]["name"], "dummy")
+			test.done();
+		});
+	},
+	'api': function(test) {
+		var str = "/**\n* @param {String} the param\n* @return {String} result\n*/\nfunction dummy(str) { return str;}";
+
+		grunt.helper('doxer', str, {format: "api"}, function(fname, comments) {
+			test.ok((/^### dummy\(\)/).test(comments));
+			test.done();
+		});
+	}
 };
