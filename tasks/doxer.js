@@ -6,9 +6,9 @@
  * Licensed under the MIT license.
  */
 
-var exec = require('child_process').exec,
-	fs = require('fs'),
-	rimraf = require('rimraf'),
+
+var fs = require('fs'),
+	rimraf = require("rimraf"),
 	dox = require("dox");
 
 module.exports = function(grunt) {
@@ -20,22 +20,16 @@ module.exports = function(grunt) {
 	// ==========================================================================
 
 	grunt.registerMultiTask('doxer', 'api doc generator', function() {
-		var files = grunt.file.expandFiles(this.file.src),
+		var files1 = grunt.file.expandFiles(this.file.src),
 			dest = this.file.dest,
-			done = this.async(),
 			options = this.data.options;
 
-		// Cleanup any existing docs
+		// cleanup
 		rimraf.sync(dest);
 
-		// TODO: there must be a better way than calling `cat`
-		exec('cat ' + files.join(' '), function(err, str) {
-			grunt.helper("doxer", str, options, function(fname, comments) {
-				grunt.file.write(dest + "/" + fname, comments)
-				if (!err) {
-					done();
-				}
-			});
+		var files = grunt.helper("concat", files1, {separator: ";"});
+		grunt.helper("doxer", files, options, function(fname, comments) {
+			grunt.file.write(dest + "/" + fname, comments)
 		});
 	});
 
