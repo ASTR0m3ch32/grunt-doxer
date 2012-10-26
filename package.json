@@ -32,12 +32,14 @@
   "devDependencies": {
     "grunt": "~0.3.15",
     "rimraf": ">= 0.0.1",
-    "dox": ">= 0.0.1"
+    "dox": ">= 0.0.1",
+	"github-flavored-markdown": "*"
   },
   "dependencies": {
     "grunt": "~0.3.15",
     "rimraf": ">= 0.0.1",
-    "dox": ">= 0.0.1"
+    "dox": ">= 0.0.1",
+	"github-flavored-markdown": "*"
   },
   "keywords": [
     "gruntplugin"

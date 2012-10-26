@@ -8,11 +8,17 @@
 
 
 var fs = require('fs'),
-	rimraf = require("rimraf"),
-	dox = require("dox");
+	path = require('path'),
+	rimraf = require('rimraf'),
+	dox = require('dox'),
+	markdown = require('github-flavored-markdown');
 
 module.exports = function(grunt) {
 	"use strict";
+	var RE_PATH = /(.*)?\/.*?\.js$/,
+		RE_EXT = /\.js$/,
+		INDEX_TEMPLATE = "<h1>API Docs</h1><ul><% for(var i=0; i < toc.length; i++) { %><li><a href=\"<%= toc[i]['path'] %>\"><%= toc[i]['target'] %></a></li><% } %></ul>";
+
 	// Please see the grunt documentation for more information regarding task and
 	// helper creation: https://github.com/cowboy/grunt/blob/master/docs/toc.md
 
@@ -20,30 +26,73 @@ module.exports = function(grunt) {
 	// TASKS
 	// ==========================================================================
 
+	var findIndex = function(fPath) {
+		var paths = fPath.split("/");
+		paths.pop();
+		var up = [];
+		for (var i = 0; i < paths.length - 1; i++) {
+			up.push("..");
+		}
+		return up.join(path.sep
+	}
+
 	grunt.registerMultiTask('doxer', 'api doc generator', function() {
-		var files1 = grunt.file.expandFiles(this.file.src),
+		var files = grunt.file.expandFiles(this.file.src),
 			dest = this.file.dest,
-			options = this.data.options;
+			options = this.data.options,
+			assetPath = path.resolve(__dirname, '..', 'assets'),
+			tpl = fs.readFileSync(path.resolve(assetPath, options.format === 'html' ? 'html.tpl' : 'md.tpl')).toString(),
+			title = options.title;
 
 		// cleanup
 		rimraf.sync(dest);
+		var toc = [];
 
-		var files = grunt.helper("concat", files1, {separator: ";"});
-		grunt.helper("doxer", files, options, function(fname, comments) {
-			grunt.file.write(dest + "/" + fname, comments);
-		});
+		grunt.utils.async.forEach(files, function(file, done) {
+			var str = grunt.file.read(file, "utf-8").toString();
+
+			grunt.helper('doxer', file, str, options, function(data) {
+				var filePath = dest + path.sep  + file.replace(RE_EXT, "." + options.format);
+
+				if (/md|html/.test(options.format)) {
+					var out = grunt.template.process(tpl,{
+							title: title,
+							body: data,
+							file: file,
+							indexFile: findIndex(filePath) + path.sep + "index.html"
+					});
+					if (options.format === "html") {
+						out = markdown.parse(out);
+						toc.push({
+							path: file.replace(RE_EXT, "." + options.format),
+							target: file
+						});
+					}
+					grunt.file.write(filePath, out);
+				} else {
+					grunt.file.write(filePath, data);
+				}
+				
+				done(null);
+			});
+			if (options.format === "html") {
+				grunt.file.write(path.resolve(dest, "index.html"),
+					grunt.template.process(INDEX_TEMPLATE, {toc: toc}));
+			}
+		}, function(err) {});
 	});
 
 	// ==========================================================================
 	// HELPERS
 	// ==========================================================================
 
-	grunt.registerHelper('doxer', function(str, options, callback) {
+	grunt.registerHelper('doxer', function(file, str, options, callback) {
 		var comments = dox.parseComments(str);
-		if (options.format === "api") {
-			callback("api.md", dox.api(comments));
+		
+		if (/md|html/.test(options.format)) {
+			callback(dox.api(comments));
 		} else {
-			callback("api.json", JSON.stringify(comments));
+			callback(JSON.stringify(comments));
 		}
 	});
 };
