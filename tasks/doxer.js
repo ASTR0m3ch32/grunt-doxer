@@ -33,7 +33,7 @@ module.exports = function(grunt) {
 		for (var i = 0; i < paths.length - 1; i++) {
 			up.push("..");
 		}
-		return up.join(path.sep
+		return up.join(path.sep);
 	}
 
 	grunt.registerMultiTask('doxer', 'api doc generator', function() {
