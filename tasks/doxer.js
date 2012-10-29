@@ -16,8 +16,7 @@ var fs = require('fs'),
 module.exports = function(grunt) {
 	"use strict";
 	var RE_PATH = /(.*)?\/.*?\.js$/,
-		RE_EXT = /\.js$/,
-		INDEX_TEMPLATE = "<h1>API Docs</h1><ul><% for(var i=0; i < toc.length; i++) { %><li><a href=\"<%= toc[i]['path'] %>\"><%= toc[i]['target'] %></a></li><% } %></ul>";
+		RE_EXT = /\.js$/;
 
 	// Please see the grunt documentation for more information regarding task and
 	// helper creation: https://github.com/cowboy/grunt/blob/master/docs/toc.md
@@ -40,8 +39,11 @@ module.exports = function(grunt) {
 		var files = grunt.file.expandFiles(this.file.src),
 			dest = this.file.dest,
 			options = this.data.options,
-			assetPath = path.resolve(__dirname, '..', 'assets'),
-			tpl = fs.readFileSync(path.resolve(assetPath, options.format === 'html' ? 'html.tpl' : 'md.tpl')).toString(),
+			assetsPath = path.resolve(__dirname, '..', 'assets'),
+			tpl = fs.readFileSync(path.resolve(assetsPath, options.format === 'html' ? 'html.tpl' : 'md.tpl'), 'utf-8').toString(),
+			pageTpl = fs.readFileSync(path.resolve(assetsPath, 'page.tpl')).toString(),
+			indexTpl = fs.readFileSync(path.resolve(assetsPath, 'index.tpl'), 'utf-8').toString(),
+			cssFile = fs.readFileSync(path.resolve(assetsPath, 'bootstrap.css'), 'utf-8'),
 			title = options.title;
 
 		// cleanup
@@ -49,20 +51,28 @@ module.exports = function(grunt) {
 		var toc = [];
 
 		grunt.utils.async.forEach(files, function(file, done) {
-			var str = grunt.file.read(file, "utf-8").toString();
+			var str = grunt.file.read(file, 'utf-8').toString(),
+				filePath = dest + path.sep  + file.replace(RE_EXT, '.' + options.format),
+				indexPath = findIndex(filePath),
+				cssFilePath = indexPath + path.sep + 'bootstrap.css',
+				indexFilePath = indexPath + path.sep + 'index.html';
 
 			grunt.helper('doxer', file, str, options, function(data) {
-				var filePath = dest + path.sep  + file.replace(RE_EXT, "." + options.format);
-
 				if (/md|html/.test(options.format)) {
 					var out = grunt.template.process(tpl,{
 							title: title,
 							body: data,
 							file: file,
-							indexFile: findIndex(filePath) + path.sep + "index.html"
+							indexFile: indexFilePath,
+							cssFile: cssFilePath
 					});
 					if (options.format === "html") {
-						out = markdown.parse(out);
+						out = grunt.template.process(pageTpl, {
+							content: markdown.parse(out),
+							title: options.title,
+							cssFile: cssFilePath
+						});
+
 						toc.push({
 							path: file.replace(RE_EXT, "." + options.format),
 							target: file
@@ -75,11 +85,18 @@ module.exports = function(grunt) {
 				
 				done(null);
 			});
-			if (options.format === "html") {
-				grunt.file.write(path.resolve(dest, "index.html"),
-					grunt.template.process(INDEX_TEMPLATE, {toc: toc}));
-			}
 		}, function(err) {});
+
+		if (options.format === "html") {
+			var content = markdown.parse(grunt.template.process(indexTpl, {toc: toc, title: options.title}));
+			grunt.file.write(path.resolve(dest, "index.html"),
+				grunt.template.process(pageTpl, {
+					content: content,
+					title: options.title,
+					cssFile: './bootstrap.css'
+				}));
+			grunt.file.write(path.resolve(dest, 'bootstrap.css'), cssFile);
+		}
 	});
 
 	// ==========================================================================
