@@ -21,7 +21,8 @@ grunt.initConfig({
 			src: ["src/lib/**/*.js"],
 			dest: "docs",
 			options: {
-				format: "api" // or "json"
+				format: "html", // or "json" or "md" defaults to html
+				title: "Doxer API" // defaults to API
 			}
 		}
 	}
