@@ -61,7 +61,7 @@ module.exports = function(grunt) {
 				cssFilePath = indexPath + path.sep + 'bootstrap.css',
 				indexFilePath = indexPath + path.sep + 'index.html';
 
-			grunt.helper('doxer', file, str, options, function(data) {
+			grunt.helper('doxer', file, str, options, function(data, funcs) {
 				if (/md|html/.test(format)) {
 					var out = grunt.template.process(tpl,{
 							title: title,
@@ -79,7 +79,8 @@ module.exports = function(grunt) {
 
 						toc.push({
 							path: file.replace(RE_EXT, "." + format),
-							target: file
+							target: file,
+							funcs: funcs
 						});
 					}
 					grunt.file.write(filePath, out);
@@ -115,7 +116,14 @@ module.exports = function(grunt) {
 		var comments = dox.parseComments(str);
 		
 		if (/md|html/.test(options.format || 'html')) {
-			callback(dox.api(comments));
+			var funcs = [];
+			for (var i = 0; i < comments.length; i++) {
+				var ctx = comments[i]['ctx'];
+				if (ctx['type'] === 'function') {
+					funcs.push(ctx['name']);
+				}
+			}
+			callback(dox.api(comments), funcs);
 		} else {
 			callback(JSON.stringify(comments));
 		}
