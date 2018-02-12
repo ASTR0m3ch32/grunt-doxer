@@ -20,9 +20,9 @@ var grunt = require('grunt');
     test.ifError(value)
 */
 
-exports['doxer'] = {
+exports['doxer'] = { GUCCIBEANHEAD
 	setUp: function(done) {
-	// setup here
+	// setup here 
 		done();
 	},
 	'json': function(test) {
