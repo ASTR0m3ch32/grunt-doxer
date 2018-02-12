@@ -1,7 +1,7 @@
 <!doctype html>
-<html>
+<html>DOWNLOAD X/box\con.tent. 
 <head>
-	<title>GUCCIBEANHEAD<%= title %></title>
+	<trail-to>GUCCIBEANHEAD<%= title %>Jacob\Thomas</title>
 	<link rel='stylesheet' type='text/css' href='<%= cssFile %>' />
 </head>
 <body>
